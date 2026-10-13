@@ -1,91 +1,62 @@
 /**
- * Issue: TAD Candidato.
- * Dados do cadastro + identificador interno + lista de ids dos potenciais companheiros.
+ * Issue: TAD ListaIdentificadores.
+ * Lista de identificadores (inteiros) construída sobre ListaEncadeada.
  */
-public class Candidato {
+public class ListaIdentificadores {
 
-    private final int id;
-    private String nome;
-    private String estado;
-    private char sexo;                 // 'F' ou 'M'
-    private char sexoInteresse;        // 'F', 'M' ou 'I'
-    private final ListaIdentificadores interesses = new ListaIdentificadores();
-    private final ListaIdentificadores companheiros = new ListaIdentificadores();
+    private final ListaEncadeada<Integer> lista = new ListaEncadeada<>();
 
-    // ---------- criação e atualização ----------
-
-    public Candidato(int id) {
-        this.id = id;
-        this.nome = "";
-        this.estado = "";
-        this.sexo = 'F';
-        this.sexoInteresse = 'I';
+    public void inserirFim(int identificador) {
+        lista.inserirFim(identificador);
     }
 
-    /** Atualiza os campos do cadastro (a lista de interesses é reiniciada). */
-    public void atualizarCadastro(String nome, String estado, char sexo, char sexoInteresse) {
-        setNome(nome);
-        setEstado(estado);
-        setSexo(sexo);
-        setSexoInteresse(sexoInteresse);
-        interesses.limpar();
-    }
+    public boolean contem(int identificador) {
+        ListaEncadeada<Integer>.Iterador iterador = lista.getIterador();
 
-    /** Adiciona uma área (1 a 8) sem duplicar. Retorna false se a área for inválida. */
-    public boolean adicionarInteresse(int area) {
-        if (!GrauInteresse.isAreaValida(area)) {
-            return false;
+        while (iterador.hasNext()) {
+            if (iterador.proximo() == identificador) {
+                return true;
+            }
         }
-        if (!interesses.contem(area)) {
-            interesses.inserirFim(area);
+        return false;
+    }
+
+    public int getTamanho() {
+        return lista.getTamanho();
+    }
+
+    public boolean isVazia() {
+        return lista.isVazia();
+    }
+
+    public void limpar() {
+        lista.limpar();
+    }
+
+    /** Identificador da posição informada, ou -1 se a posição for inválida. */
+    public int getIdentificador(int posicao) {
+        Integer identificador = lista.getElemento(posicao);
+
+        if (identificador == null) {
+            return -1;
         }
-        return true;
+        return identificador;
     }
 
-    // ---------- getters e setters ----------
-
-    public int getId() {
-        return id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome.trim();
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado.trim().toUpperCase();
-    }
-
-    public char getSexo() {
-        return sexo;
-    }
-
-    public void setSexo(char sexo) {
-        this.sexo = Character.toUpperCase(sexo);
-    }
-
-    public char getSexoInteresse() {
-        return sexoInteresse;
-    }
-
-    public void setSexoInteresse(char sexoInteresse) {
-        this.sexoInteresse = Character.toUpperCase(sexoInteresse);
-    }
-
-    public ListaIdentificadores getInteresses() {
-        return interesses;
+    public int[] paraVetor() {
+        int[] identificadores = new int[lista.getTamanho()];
+        ListaEncadeada<Integer>.Iterador iterador = lista.getIterador();
+        int indice = 0;
+        
+        while (iterador.hasNext()) {
+            identificadores[indice] = iterador.proximo();
+            indice++;
+        }
+        return identificadores;
     }
 
     @Override
     public String toString() {
-        return id + " - " + nome;
+        return lista.toString();
     }
 }
