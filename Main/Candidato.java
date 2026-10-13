@@ -8,7 +8,7 @@ public class Candidato {
     private final ListaIdentificadores interesses = new ListaIdentificadores();
     private final ListaIdentificadores companheiros = new ListaIdentificadores();
 
-    // ---------- criação ----------
+    // ---------- criação e atualização ----------
 
     public Candidato(int id) {
         this.id = id;
@@ -16,6 +16,26 @@ public class Candidato {
         this.estado = "";
         this.sexo = 'F';
         this.sexoInteresse = 'I';
+    }
+
+    /** Atualiza os campos do cadastro (a lista de interesses é reiniciada). */
+    public void atualizarCadastro(String nome, String estado, char sexo, char sexoInteresse) {
+        setNome(nome);
+        setEstado(estado);
+        setSexo(sexo);
+        setSexoInteresse(sexoInteresse);
+        interesses.limpar();
+    }
+
+    /** Adiciona uma área (1 a 8) sem duplicar. Retorna false se a área for inválida. */
+    public boolean adicionarInteresse(int area) {
+        if (!GrauInteresse.isAreaValida(area)) {
+            return false;
+        }
+        if (!interesses.contem(area)) {
+            interesses.inserirFim(area);
+        }
+        return true;
     }
 
     // ---------- getters e setters ----------
