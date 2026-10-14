@@ -1,12 +1,21 @@
+import java.io.IOException;
+
+/**
+ * Classe de controle: coordena a Main e o modelo (criação dos objetos via arquivo,
+ * recálculo dos pares após mudanças e repasse das consultas).
+ * A lógica de busca e filtro fica nas classes de origem (ListaCandidatos, Candidato...).
+ * Não imprime nada: a Main exibe os resultados via toString().
+ */
 public class ControleAgencia {
-  private ListaCandidatos candidatos = new ListaCandidatos();
+
+    private ListaCandidatos candidatos = new ListaCandidatos();
 
     // ---------- carga de dados ----------
 
-    /** Lê o arquivo e calcula os potenciais companheiros de todos os candidatos. */
+    /** Cria os candidatos a partir do arquivo e calcula os potenciais companheiros. */
     public void carregar(String nomeArquivo) throws IOException {
         candidatos = LerCandidatos.ler(nomeArquivo);
-        recalcularCompanheiros();
+        candidatos.calcularCompanheiros();
     }
 
     public void gerarArquivoTeste(int quantidade, String arquivoNomes, String arquivoSaida) throws IOException {
@@ -17,18 +26,7 @@ public class ControleAgencia {
         return candidatos.getTamanho();
     }
 
-    private void recalcularCompanheiros() {
-        Candidato[] todos = candidatos.paraVetor();
-        for (int i = 0; i < todos.length; i++) {
-            todos[i].limparCompanheiros();
-            for (int j = 0; j < todos.length; j++) {
-                if (todos[i].verificaPotencialCompanheiro(todos[j])) {
-                    todos[i].inserePotencialCompanheiro(todos[j]);
-                }
-            }
-        }
-    }  
-  // ---------- Tarefa 1: grau de interesse desejado ----------
+    // ---------- Tarefa 1: grau de interesse desejado ----------
 
     public int getGrauDesejado() {
         return GrauInteresse.getGrauDesejado();
@@ -44,82 +42,54 @@ public class ControleAgencia {
             return false;
         }
         GrauInteresse.setGrauDesejado(grau);
-        recalcularCompanheiros();
+        candidatos.calcularCompanheiros();
         return true;
     }
-  // ---------- Tarefa 2: companheiros de um candidato ----------
 
-    /** Busca por id (se o texto for número) ou por nome exato (ignora maiúsculas). */
+    // ---------- Tarefa 2: companheiros de um candidato ----------
+
+    /** Interpreta o texto digitado: número = id, qualquer outra coisa = nome. */
     public ListaCandidatos buscarCandidato(String texto) {
-        ListaCandidatos encontrados = new ListaCandidatos();
-        texto = texto.trim();
         try {
-            int id = Integer.parseInt(texto);
+            int id = Integer.parseInt(texto.trim());
+            ListaCandidatos encontrados = new ListaCandidatos();
             Candidato candidato = candidatos.buscarPorId(id);
             if (candidato != null) {
                 encontrados.inserirFim(candidato);
             }
             return encontrados;
         } catch (NumberFormatException erro) {
-            // não é número: busca pelo nome
+            return candidatos.buscarPorNome(texto);
         }
-        Candidato[] todos = candidatos.paraVetor();
-        for (int i = 0; i < todos.length; i++) {
-            if (todos[i].getNome().equalsIgnoreCase(texto)) {
-                encontrados.inserirFim(todos[i]);
-            }
-        }
-        return encontrados;
     }
 
     public ListaCandidatos companheirosDe(Candidato candidato) {
-        ListaCandidatos companheiros = new ListaCandidatos();
-        int[] ids = candidato.listaCompanheiros().paraVetor();
-        for (int i = 0; i < ids.length; i++) {
-            companheiros.inserirFim(candidatos.buscarPorId(ids[i]));
-        }
-        return companheiros;
+        return candidatos.companheirosDe(candidato);
     }
-      // ---------- Tarefa 3: K candidatos com mais companheiros ----------
+
+    // ---------- Tarefas 3 a 6: consultas (repasse à lista) ----------
 
     public ListaCandidatos topK(int k) {
-        Candidato[] ordenados = candidatos.paraVetor();
-        if (k > ordenados.length) {
-            k = ordenados.length;
-        }
-        for (int i = 0; i < k; i++) {                    // seleção parcial dos K maiores
-            int indiceMelhor = i;
-            for (int j = i + 1; j < ordenados.length; j++) {
-                int companheirosJ = ordenados[j].numeroCompanheiros();
-                int companheirosMelhor = ordenados[indiceMelhor].numeroCompanheiros();
-                boolean temMais = companheirosJ > companheirosMelhor;
-                boolean empateComIdMenor = companheirosJ == companheirosMelhor
-                        && ordenados[j].getId() < ordenados[indiceMelhor].getId();
-                if (temMais || empateComIdMenor) {
-                    indiceMelhor = j;
-                }
-            }
-            Candidato auxiliar = ordenados[i];
-            ordenados[i] = ordenados[indiceMelhor];
-            ordenados[indiceMelhor] = auxiliar;
-        }
-        ListaCandidatos resultado = new ListaCandidatos();
-        for (int i = 0; i < k; i++) {
-            resultado.inserirFim(ordenados[i]);
-        }
-        return resultado;
+        return candidatos.comMaisCompanheiros(k);
     }
-   // ---------- Tarefa 4: candidatos sem companheiros ----------
 
     public ListaCandidatos semCompanheiros() {
-        ListaCandidatos resultado = new ListaCandidatos();
-        Candidato[] todos = candidatos.paraVetor();
-        for (int i = 0; i < todos.length; i++) {
-            if (todos[i].numeroCompanheiros() == 0) {
-                resultado.inserirFim(todos[i]);
-            }
-        }
-        return resultado;
+        return candidatos.semCompanheiros();
     }
 
+    public boolean isAreaValida(int area) {
+        return GrauInteresse.isAreaValida(area);
+    }
+
+    public String getNomeArea(int area) {
+        return GrauInteresse.getNomeArea(area);
+    }
+
+    public ListaCandidatos comInteresse(int area) {
+        return candidatos.comInteresse(area);
+    }
+
+    public ListaCandidatos residentesEm(String sigla) {
+        return candidatos.residentesEm(sigla);
+    }
 }
