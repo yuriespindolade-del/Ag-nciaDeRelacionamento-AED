@@ -25,40 +25,44 @@ public class ListaCandidatos {
         return lista.getElemento(posicao);
     }
 
-    /** Busca pelo identificador interno; retorna null se não existir. */
+    public Candidato[] paraVetor() {
+        return lista.paraVetor(new Candidato[lista.getTamanho()]);
+    }
+
+    // Busca pelo identificador interno; retorna null se não existir.
     public Candidato buscarPorId(int id) {
-        ListaEncadeada<Candidato>.Iterador iterador = lista.getIterador();
-        while (iterador.hasNext()) {
-            Candidato candidato = iterador.proximo();
-            if (candidato.getId() == id) {
-                return candidato;
+        Candidato[] todos = paraVetor();
+        for (int i = 0; i < todos.length; i++) {
+            if (todos[i].getId() == id) {
+                return todos[i];
             }
         }
         return null;
     }
 
-    public Candidato[] paraVetor() {
-
-        Candidato[] candidatos = new Candidato[lista.getTamanho()];
-        ListaEncadeada<Candidato>.Iterador iterador = lista.getIterador();
-        int indice = 0;
-        while (iterador.hasNext()) {
-            candidatos[indice] = iterador.proximo();
-            indice++;
+    // Candidatos com o nome exato informado (ignora maiúsculas/minúsculas).
+    public ListaCandidatos buscarPorNome(String nome) {
+        ListaCandidatos encontrados = new ListaCandidatos();
+        Candidato[] todos = paraVetor();
+        for (int i = 0; i < todos.length; i++) {
+            if (todos[i].getNome().equalsIgnoreCase(nome.trim())) {
+                encontrados.inserirFim(todos[i]);
+            }
         }
-        return candidatos;
+        return encontrados;
     }
 
+    // Uma linha " id - nome" por candidato.
     @Override
     public String toString() {
         if (lista.isVazia()) {
-            return "  (Sem Candidatos)";
+            return "(Sem Candidatos)";
         }
         StringBuilder sb = new StringBuilder();
-        ListaEncadeada<Candidato>.Iterador iterador = lista.getIterador();
-        while (iterador.hasNext()) {
-            sb.append("  ").append(iterador.proximo());
-            if (iterador.hasNext()) {
+        Candidato[] todos = paraVetor();
+        for (int i = 0; i < todos.length; i++) {
+            sb.append("  ").append(todos[i]);
+            if (i < todos.length - 1) {
                 sb.append("\n");
             }
         }
