@@ -1,8 +1,8 @@
-/**
+/*
  * Issue: TAD Candidato.
- * Dados do cadastro + identificador interno + lista de ids dos potenciais companheiros.
  */
 public class Candidato {
+    private static int proximoId = 1; // Garante um Id único.
 
     private final int id;
     private String nome;
@@ -12,17 +12,12 @@ public class Candidato {
     private final ListaIdentificadores interesses = new ListaIdentificadores();
     private final ListaIdentificadores companheiros = new ListaIdentificadores();
 
-    // ---------- criação e atualização ----------
-
-    public Candidato(int id) {
-        this.id = id;
-        this.nome = "";
-        this.estado = "";
-        this.sexo = 'F';
-        this.sexoInteresse = 'I';
+    public Candidato() {
+        this.id = proximoId;
+        proximoId++;
     }
 
-    /** Atualiza os campos do cadastro (a lista de interesses é reiniciada). */
+    // Atualiza os campos do cadastro (a lista de interesses é reiniciada).
     public void atualizarCadastro(String nome, String estado, char sexo, char sexoInteresse) {
         setNome(nome);
         setEstado(estado);
@@ -31,7 +26,7 @@ public class Candidato {
         interesses.limpar();
     }
 
-    /** Adiciona uma área (1 a 8) sem duplicar. Retorna false se a área for inválida. */
+    // Adiciona uma área (1 a 8) sem duplicar. Retorna false se a área for inválida.
     public boolean adicionarInteresse(int area) {
         if (!GrauInteresse.isAreaValida(area)) {
             return false;
@@ -46,8 +41,6 @@ public class Candidato {
         companheiros.limpar();
     }
 
-    // ---------- getters e setters ----------
-
     public int getId() {
         return id;
     }
@@ -57,6 +50,9 @@ public class Candidato {
     }
 
     public void setNome(String nome) {
+        if (nome == null || nome.trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome inválido.");
+        }
         this.nome = nome.trim();
     }
 
@@ -64,54 +60,110 @@ public class Candidato {
         return estado;
     }
 
+    // A sigla deve ter exatamente duas letras (ex.: MG).
     public void setEstado(String estado) {
-        this.estado = estado.trim().toUpperCase();
+        if (estado == null) {
+            throw new IllegalArgumentException("Estado inválido.");
+        }
+        String sigla = estado.trim().toUpperCase();
+        if (sigla.length() != 2 || !Character.isLetter(sigla.charAt(0)) || !Character.isLetter(sigla.charAt(1))) {
+            throw new IllegalArgumentException("Estado inválido: '" + estado + "'.");
+        }
+        this.estado = sigla;
     }
 
     public char getSexo() {
         return sexo;
     }
 
+    // Aceita 'F' ou 'M'.
     public void setSexo(char sexo) {
-        this.sexo = Character.toUpperCase(sexo);
+        char sexoMaiusculo = Character.toUpperCase(sexo);
+        if (sexoMaiusculo != 'F' && sexoMaiusculo != 'M') {
+            throw new IllegalArgumentException("Sexo inválido: '" + sexo + "'.");
+        }
+        this.sexo = sexoMaiusculo;
     }
 
     public char getSexoInteresse() {
         return sexoInteresse;
     }
 
+    // Aceita 'F', 'M' ou 'I' (indiferente).
     public void setSexoInteresse(char sexoInteresse) {
-        this.sexoInteresse = Character.toUpperCase(sexoInteresse);
+        char interesseMaiusculo = Character.toUpperCase(sexoInteresse);
+        if (interesseMaiusculo != 'F' && interesseMaiusculo != 'M' && interesseMaiusculo != 'I') {
+            throw new IllegalArgumentException("Sexo de interesse inválido: '" + sexoInteresse + "'.");
+        }
+        this.sexoInteresse = interesseMaiusculo;
     }
 
     public ListaIdentificadores getInteresses() {
         return interesses;
     }
 
-    // ---------- operações exigidas pelo enunciado ----------
-
-    public static boolean verificaPotencialCompanheiro(Candidato candidato, Candidato outro) {
-        return ValidadorPares.verifica(candidato, outro);
+    /*
+     * Verdadeiro se este candidato e 'outro' podem ser potenciais companheiros:
+     * mesmo estado, opção sexual atendida pelos dois e grau de interesse em comum
+     * maior ou igual ao grau desejado.
+     */
+    public boolean verificaPotencialCompanheiro(Candidato outro) {
+        if (id == outro.getId()) {
+            return false;
+        }
+        if (!estado.equals(outro.getEstado())) {
+            return false;
+        }
+        if (!atendeOpcaoSexual(outro) || !outro.atendeOpcaoSexual(this)) {
+            return false;
+        }
+        if (calcularGrauInteresseComum(outro) >= GrauInteresse.getGrauDesejado())
+            return true;
+        else
+            return false;
     }
 
-    public static void inserePotencialCompanheiro(Candidato candidato, Candidato outro) {
-        candidato.companheiros.inserirFim(outro.getId());   // usa o getter, não acessa o campo
+    // Insere o identificador de 'outro' na lista de companheiros deste candidato.
+    public void inserePotencialCompanheiro(Candidato outro) {
+        companheiros.inserirFim(outro.getId());
     }
 
-    public static int numeroCompanheiros(Candidato candidato) {
-        return candidato.companheiros.getTamanho();
+    public int numeroCompanheiros() {
+        return companheiros.getTamanho();
     }
 
-    public static ListaIdentificadores listaCompanheiros(Candidato candidato) {
-        return candidato.companheiros;
+    public ListaIdentificadores listaCompanheiros() {
+        return companheiros;
     }
 
-    public static boolean temInteresse(Candidato candidato, int idArea) {
-        return candidato.interesses.contem(idArea);
+    public boolean temInteresse(int idArea) {
+        return interesses.contem(idArea);
     }
 
-    public static boolean reside(Candidato candidato, String sigla) {
-        if (candidato.estado.equalsIgnoreCase(sigla.trim()))
+    public boolean reside(String sigla) {
+        if (estado.equalsIgnoreCase(sigla.trim()))
+            return true;
+        else
+            return false;
+    }
+
+    // Soma dos pesos das áreas de interesse em comum entre este candidato e 'outro'
+    public int calcularGrauInteresseComum(Candidato outro) {
+        int grau = 0;
+        int[] areas = interesses.paraVetor();
+        for (int indice = 0; indice < areas.length; indice++) {
+            if (outro.temInteresse(areas[indice])) {
+                grau = grau + GrauInteresse.getPeso(areas[indice]);
+            }
+        }
+        return grau;
+    }
+
+    private boolean atendeOpcaoSexual(Candidato outro) {
+        if (sexoInteresse == 'I') {
+            return true;
+        }
+        if (sexoInteresse == outro.getSexo())
             return true;
         else
             return false;
