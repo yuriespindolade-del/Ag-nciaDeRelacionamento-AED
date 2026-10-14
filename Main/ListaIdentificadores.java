@@ -4,21 +4,14 @@
  */
 public class ListaIdentificadores {
 
-    private final ListaEncadeada<Integer> lista = new ListaEncadeada<>();
+    private final ListaEncadeada<Integer> lista = new ListaEncadeada<Integer>();
 
     public void inserirFim(int identificador) {
         lista.inserirFim(identificador);
     }
 
     public boolean contem(int identificador) {
-        ListaEncadeada<Integer>.Iterador iterador = lista.getIterador();
-
-        while (iterador.hasNext()) {
-            if (iterador.proximo() == identificador) {
-                return true;
-            }
-        }
-        return false;
+        return lista.contem(identificador);
     }
 
     public int getTamanho() {
@@ -36,21 +29,17 @@ public class ListaIdentificadores {
     /** Identificador da posição informada, ou -1 se a posição for inválida. */
     public int getIdentificador(int posicao) {
         Integer identificador = lista.getElemento(posicao);
-
         if (identificador == null) {
             return -1;
         }
-        return identificador;
+        return identificador.intValue();
     }
 
     public int[] paraVetor() {
-        int[] identificadores = new int[lista.getTamanho()];
-        ListaEncadeada<Integer>.Iterador iterador = lista.getIterador();
-        int indice = 0;
-        
-        while (iterador.hasNext()) {
-            identificadores[indice] = iterador.proximo();
-            indice++;
+        Integer[] objetos = lista.paraVetor(new Integer[lista.getTamanho()]);
+        int[] identificadores = new int[objetos.length];
+        for (int indice = 0; indice < objetos.length; indice++) {
+            identificadores[indice] = objetos[indice].intValue();
         }
         return identificadores;
     }
