@@ -80,5 +80,34 @@ public class ControleAgencia {
         }
         return companheiros;
     }
+      // ---------- Tarefa 3: K candidatos com mais companheiros ----------
+
+    public ListaCandidatos topK(int k) {
+        Candidato[] ordenados = candidatos.paraVetor();
+        if (k > ordenados.length) {
+            k = ordenados.length;
+        }
+        for (int i = 0; i < k; i++) {                    // seleção parcial dos K maiores
+            int indiceMelhor = i;
+            for (int j = i + 1; j < ordenados.length; j++) {
+                int companheirosJ = ordenados[j].numeroCompanheiros();
+                int companheirosMelhor = ordenados[indiceMelhor].numeroCompanheiros();
+                boolean temMais = companheirosJ > companheirosMelhor;
+                boolean empateComIdMenor = companheirosJ == companheirosMelhor
+                        && ordenados[j].getId() < ordenados[indiceMelhor].getId();
+                if (temMais || empateComIdMenor) {
+                    indiceMelhor = j;
+                }
+            }
+            Candidato auxiliar = ordenados[i];
+            ordenados[i] = ordenados[indiceMelhor];
+            ordenados[indiceMelhor] = auxiliar;
+        }
+        ListaCandidatos resultado = new ListaCandidatos();
+        for (int i = 0; i < k; i++) {
+            resultado.inserirFim(ordenados[i]);
+        }
+        return resultado;
+    }
 
 }
