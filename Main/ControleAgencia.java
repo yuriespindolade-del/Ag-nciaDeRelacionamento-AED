@@ -109,5 +109,17 @@ public class ControleAgencia {
         }
         return resultado;
     }
+   // ---------- Tarefa 4: candidatos sem companheiros ----------
+
+    public ListaCandidatos semCompanheiros() {
+        ListaCandidatos resultado = new ListaCandidatos();
+        Candidato[] todos = candidatos.paraVetor();
+        for (int i = 0; i < todos.length; i++) {
+            if (todos[i].numeroCompanheiros() == 0) {
+                resultado.inserirFim(todos[i]);
+            }
+        }
+        return resultado;
+    }
 
 }
