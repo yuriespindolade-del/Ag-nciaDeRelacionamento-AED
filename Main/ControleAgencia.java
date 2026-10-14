@@ -47,5 +47,38 @@ public class ControleAgencia {
         recalcularCompanheiros();
         return true;
     }
+  // ---------- Tarefa 2: companheiros de um candidato ----------
+
+    /** Busca por id (se o texto for número) ou por nome exato (ignora maiúsculas). */
+    public ListaCandidatos buscarCandidato(String texto) {
+        ListaCandidatos encontrados = new ListaCandidatos();
+        texto = texto.trim();
+        try {
+            int id = Integer.parseInt(texto);
+            Candidato candidato = candidatos.buscarPorId(id);
+            if (candidato != null) {
+                encontrados.inserirFim(candidato);
+            }
+            return encontrados;
+        } catch (NumberFormatException erro) {
+            // não é número: busca pelo nome
+        }
+        Candidato[] todos = candidatos.paraVetor();
+        for (int i = 0; i < todos.length; i++) {
+            if (todos[i].getNome().equalsIgnoreCase(texto)) {
+                encontrados.inserirFim(todos[i]);
+            }
+        }
+        return encontrados;
+    }
+
+    public ListaCandidatos companheirosDe(Candidato candidato) {
+        ListaCandidatos companheiros = new ListaCandidatos();
+        int[] ids = candidato.listaCompanheiros().paraVetor();
+        for (int i = 0; i < ids.length; i++) {
+            companheiros.inserirFim(candidatos.buscarPorId(ids[i]));
+        }
+        return companheiros;
+    }
 
 }
