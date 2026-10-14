@@ -56,8 +56,12 @@ public class LerCandidatos {
                 }
 
                 int numeroAreas = converterParaInteiro(lerProximaLinha(leitor), "Número de áreas");
-                Candidato candidato = new Candidato(posicao);
-                candidato.atualizarCadastro(nome, estado, sexo.charAt(0), sexoInteresse.charAt(0));
+                Candidato candidato = new Candidato();
+                try {
+                    candidato.atualizarCadastro(nome, estado, sexo.charAt(0), sexoInteresse.charAt(0));
+                } catch (IllegalArgumentException erro) {
+                    throw new IOException(erro.getMessage() + " (candidato " + posicao + ")");
+                }
                 for (int contador = 0; contador < numeroAreas; contador++) {
                     int area = converterParaInteiro(lerProximaLinha(leitor), "Área");
                     if (!candidato.adicionarInteresse(area)) {
