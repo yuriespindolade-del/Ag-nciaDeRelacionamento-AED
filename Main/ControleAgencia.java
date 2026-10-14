@@ -28,4 +28,24 @@ public class ControleAgencia {
             }
         }
     }  
+  // ---------- Tarefa 1: grau de interesse desejado ----------
+
+    public int getGrauDesejado() {
+        return GrauInteresse.getGrauDesejado();
+    }
+
+    public int getGrauMaximo() {
+        return GrauInteresse.getGrauMaximo();
+    }
+
+    /** Retorna false (sem alterar nada) se o grau for inválido. */
+    public boolean atualizarGrauDesejado(int grau) {
+        if (!GrauInteresse.isGrauValido(grau)) {
+            return false;
+        }
+        GrauInteresse.setGrauDesejado(grau);
+        recalcularCompanheiros();
+        return true;
+    }
+
 }
