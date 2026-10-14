@@ -1,3 +1,7 @@
+/**
+ * Issue: TAD Candidato.
+ * Dados do cadastro + identificador interno + lista de ids dos potenciais companheiros.
+ */
 public class Candidato {
 
     private final int id;
