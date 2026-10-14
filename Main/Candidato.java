@@ -38,6 +38,10 @@ public class Candidato {
         return true;
     }
 
+    public void limparCompanheiros() {
+        companheiros.limpar();
+    }
+
     // ---------- getters e setters ----------
 
     public int getId() {
@@ -78,6 +82,35 @@ public class Candidato {
 
     public ListaIdentificadores getInteresses() {
         return interesses;
+    }
+
+    // ---------- operações exigidas pelo enunciado ----------
+
+    public static boolean verificaPotencialCompanheiro(Candidato candidato, Candidato outro) {
+        return ValidadorPares.verifica(candidato, outro);
+    }
+
+    public static void inserePotencialCompanheiro(Candidato candidato, Candidato outro) {
+        candidato.companheiros.inserirFim(outro.getId());   // usa o getter, não acessa o campo
+    }
+
+    public static int numeroCompanheiros(Candidato candidato) {
+        return candidato.companheiros.getTamanho();
+    }
+
+    public static ListaIdentificadores listaCompanheiros(Candidato candidato) {
+        return candidato.companheiros;
+    }
+
+    public static boolean temInteresse(Candidato candidato, int idArea) {
+        return candidato.interesses.contem(idArea);
+    }
+
+    public static boolean reside(Candidato candidato, String sigla) {
+        if (candidato.estado.equalsIgnoreCase(sigla.trim()))
+            return true;
+        else
+            return false;
     }
 
     @Override
