@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.Random;
 /*
  * Issue: Gerador Auxiliar de Testes (GeradorCandidatos).
- * Gera um arquivo candidatos.txt com dados aleatórios. Não imprime nada.
+ * Gera um arquivo candidatos.txt com dados aleatórios.
+ * Pode ser usado como programa separado: java GeradorCandidatos [quantidade] [nomes.txt] [saida.txt]
  */
 public class GeradorCandidatos {
     private static final String[] NOMES_PADRAO = {
@@ -96,6 +96,30 @@ public class GeradorCandidatos {
             saida.println("****");
         } finally {
             saida.close();
+        }
+    }
+
+    // Programa auxiliar independente: gera o candidatos.txt sem abrir o sistema.
+    public static void main(String[] args) {
+        int quantidade = 30;
+        String arquivoNomes = "nomes.txt";
+        String arquivoSaida = "candidatos.txt";
+        try {
+            if (args.length > 0) {
+                quantidade = Integer.parseInt(args[0]);
+            }
+            if (args.length > 1) {
+                arquivoNomes = args[1];
+            }
+            if (args.length > 2) {
+                arquivoSaida = args[2];
+            }
+            gerar(quantidade, arquivoNomes, arquivoSaida);
+            System.out.println("Arquivo '" + arquivoSaida + "' gerado com " + quantidade + " candidatos.");
+        } catch (NumberFormatException erro) {
+            System.out.println("Quantidade inválida: '" + args[0] + "'.");
+        } catch (IOException erro) {
+            System.out.println("Erro ao gerar arquivo: " + erro.getMessage());
         }
     }
 }
