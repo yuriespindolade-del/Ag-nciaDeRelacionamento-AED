@@ -2,8 +2,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
-
-    private static final Scanner scanner = new Scanner(System.in, "UTF-8");
+    private static final Scanner scanner = new Scanner(System.in);
     private static final ControleAgencia controle = new ControleAgencia();
     private static final String ARQUIVO_DADOS = "candidatos.txt";
     private static final String ARQUIVO_NOMES = "nomes.txt";
@@ -129,13 +128,6 @@ public class Main {
 
     public static void main(String[] args) {
         int quantidade = QUANTIDADE_PADRAO;
-        if (args.length > 0) {
-            try {
-                quantidade = Integer.parseInt(args[0]);
-            } catch (NumberFormatException erro) {
-                System.out.println("Quantidade inválida '" + args[0] + "'. Usando " + QUANTIDADE_PADRAO + ".");
-            }
-        }
         gerarDados(quantidade);
         carregarDados();
 
