@@ -1,95 +1,77 @@
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
-/**
- * Classe de controle: coordena a Main e o modelo (criação dos objetos via arquivo,
- * recálculo dos pares após mudanças e repasse das consultas).
- * A lógica de busca e filtro fica nas classes de origem (ListaCandidatos, Candidato...).
- * Não imprime nada: a Main exibe os resultados via toString().
+/*
+ * Issue: Parser do arquivo candidatos.txt.
+ * Formato: N, depois blocos separados por "****" com
+ * nome, sigla, sexo, sexo_interesse, número_áreas e as áreas (uma por linha).
+ * Erros são lançados como IOException (quem imprime é a Main).
  */
-public class ControleAgencia {
-
-    private ListaCandidatos candidatos = new ListaCandidatos();
-
-    // ---------- carga de dados ----------
-
-    /** Cria os candidatos a partir do arquivo e calcula os potenciais companheiros. */
-    public void carregar(String nomeArquivo) throws IOException {
-        candidatos = LerCandidatos.ler(nomeArquivo);
-        candidatos.calcularCompanheiros();
-    }
-
-    public void gerarArquivoTeste(int quantidade, String arquivoNomes, String arquivoSaida) throws IOException {
-        GeradorCandidatos.gerar(quantidade, arquivoNomes, arquivoSaida);
-    }
-
-    public int getTotalCandidatos() {
-        return candidatos.getTamanho();
-    }
-
-    // ---------- Tarefa 1: grau de interesse desejado ----------
-
-    public int getGrauDesejado() {
-        return GrauInteresse.getGrauDesejado();
-    }
-
-    public int getGrauMaximo() {
-        return GrauInteresse.getGrauMaximo();
-    }
-
-    /** Retorna false (sem alterar nada) se o grau for inválido. */
-    public boolean atualizarGrauDesejado(int grau) {
-        if (!GrauInteresse.isGrauValido(grau)) {
-            return false;
-        }
-        GrauInteresse.setGrauDesejado(grau);
-        candidatos.calcularCompanheiros();
-        return true;
-    }
-
-    // ---------- Tarefa 2: companheiros de um candidato ----------
-
-    /** Interpreta o texto digitado: número = id, qualquer outra coisa = nome. */
-    public ListaCandidatos buscarCandidato(String texto) {
-        try {
-            int id = Integer.parseInt(texto.trim());
-            ListaCandidatos encontrados = new ListaCandidatos();
-            Candidato candidato = candidatos.buscarPorId(id);
-            if (candidato != null) {
-                encontrados.inserirFim(candidato);
+public class LerCandidatos {
+    /* Lê a próxima linha útil, ignorando linhas vazias e os separadores "****". */
+    private static String lerProximaLinha(BufferedReader leitor) throws IOException {
+        String linha = leitor.readLine();
+        while (linha != null) {
+            linha = linha.trim();
+            if (linha.startsWith("\uFEFF")) {
+                linha = linha.substring(1);
             }
-            return encontrados;
+            if (linha.length() > 0 && !linha.equals("****")) {
+                return linha;
+            }
+            linha = leitor.readLine();
+        }
+        throw new IOException("Fim do arquivo.");
+    }
+
+    private static int converterParaInteiro(String texto, String campo) throws IOException {
+        try {
+            return Integer.parseInt(texto.split("\\s+")[0]);
         } catch (NumberFormatException erro) {
-            return candidatos.buscarPorNome(texto);
+            throw new IOException("Valor inválido para " + campo + ": '" + texto + "'.");
         }
     }
 
-    public ListaCandidatos companheirosDe(Candidato candidato) {
-        return candidatos.companheirosDe(candidato);
-    }
+    public static ListaCandidatos ler(String nomeArquivo) throws IOException {
+        ListaCandidatos candidatos = new ListaCandidatos();
+        BufferedReader leitor = new BufferedReader(
+                new InputStreamReader(new FileInputStream(nomeArquivo)));
+        try {
+            int numeroCandidatos = converterParaInteiro(lerProximaLinha(leitor), "Número de candidatos");
+            for (int posicao = 1; posicao <= numeroCandidatos; posicao++) {
+                String nome = lerProximaLinha(leitor);
+                String estado = lerProximaLinha(leitor);
+                String sexo = lerProximaLinha(leitor).toUpperCase();
+                String sexoInteresse = lerProximaLinha(leitor).toUpperCase();
 
-    // ---------- Tarefas 3 a 6: consultas (repasse à lista) ----------
+                if (!sexo.equals("F") && !sexo.equals("M")) {
+                    throw new IOException("Sexo inválido no candidato " + posicao + ": '" + sexo + "'.");
+                }
+                if (!sexoInteresse.equals("F") && !sexoInteresse.equals("M") && !sexoInteresse.equals("I")) {
+                    throw new IOException("Sexo de interesse inválido no candidato " + posicao
+                            + ": '" + sexoInteresse + "'.");
+                }
 
-    public ListaCandidatos topK(int k) {
-        return candidatos.comMaisCompanheiros(k);
-    }
-
-    public ListaCandidatos semCompanheiros() {
-        return candidatos.semCompanheiros();
-    }
-
-    public boolean isAreaValida(int area) {
-        return GrauInteresse.isAreaValida(area);
-    }
-
-    public String getNomeArea(int area) {
-        return GrauInteresse.getNomeArea(area);
-    }
-
-    public ListaCandidatos comInteresse(int area) {
-        return candidatos.comInteresse(area);
-    }
-
-    public ListaCandidatos residentesEm(String sigla) {
-        return candidatos.residentesEm(sigla);
+                int numeroAreas = converterParaInteiro(lerProximaLinha(leitor), "Número de áreas");
+                Candidato candidato = new Candidato();
+                try {
+                    candidato.atualizarCadastro(nome, estado, sexo.charAt(0), sexoInteresse.charAt(0));
+                } catch (IllegalArgumentException erro) {
+                    throw new IOException(erro.getMessage() + " (candidato " + posicao + ")");
+                }
+                for (int contador = 0; contador < numeroAreas; contador++) {
+                    int area = converterParaInteiro(lerProximaLinha(leitor), "Área");
+                    if (!candidato.adicionarInteresse(area)) {
+                        throw new IOException("Área inválida no candidato " + posicao + ": " + area + ".");
+                    }
+                }
+                candidatos.inserirFim(candidato);
+            }
+        } finally {
+            leitor.close();
+        }
+        return candidatos;
     }
 }
