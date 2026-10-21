@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    private static final Scanner scanner = new Scanner(System.in, "UTF-8");
+    private static final Scanner scanner = new Scanner(System.in);
     private static final ControleAgencia controle = new ControleAgencia();
     private static final String ARQUIVO_DADOS = "candidatos.txt";
     private static final String ARQUIVO_NOMES = "nomes.txt";
