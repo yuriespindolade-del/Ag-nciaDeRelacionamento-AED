@@ -1,18 +1,30 @@
+import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
-    private static final Scanner scanner = new Scanner(System.in);
+
+    private static final Scanner scanner = new Scanner(System.in, "UTF-8");
     private static final ControleAgencia controle = new ControleAgencia();
     private static final String ARQUIVO_DADOS = "candidatos.txt";
     private static final String ARQUIVO_NOMES = "nomes.txt";
     private static final int QUANTIDADE_PADRAO = 30;
 
+    // Lê uma linha; se a entrada terminar (Ctrl+D / fim do arquivo), encerra o programa sem erro.
+    private static String lerLinha() {
+        if (!scanner.hasNextLine()) {
+            System.out.println();
+            System.out.println("Entrada encerrada. Saindo do sistema...");
+            System.exit(0);
+        }
+        return scanner.nextLine();
+    }
+
     private static int lerInteiro(String mensagem) {
         while (true) {
             System.out.print(mensagem);
             try {
-                return Integer.parseInt(scanner.nextLine().trim());
+                return Integer.parseInt(lerLinha().trim());
             } catch (NumberFormatException erro) {
                 System.out.println("Valor inválido. Digite um número inteiro.");
             }
@@ -21,7 +33,7 @@ public class Main {
 
     private static String lerTexto(String mensagem) {
         System.out.print(mensagem);
-        return scanner.nextLine().trim();
+        return lerLinha().trim();
     }
 
     private static void carregarDados() {
@@ -62,17 +74,17 @@ public class Main {
         }
     }
 
-    private static void mostrarMaioresNumerosDeCompanheiros() {
-        int k = lerInteiro("Valor de K: ");
+    private static void mostrarRankingCompatibilidade() {
+        int k = lerInteiro("Quantos candidatos mostrar no ranking (K): ");
         if (k < 1) {
             System.out.println("K deve ser maior ou igual a 1.");
             return;
         }
-        ListaCandidatos maiores = controle.topK(k);
-        System.out.println("Os " + maiores.getTamanho() + " candidatos com mais potenciais companheiros:");
+        ListaCandidatos maiores = controle.rankingCompatibilidade(k);
+        System.out.println("Ranking de compatibilidade - os " + maiores.getTamanho() + " candidatos mais compatíveis:");
         Candidato[] candidatos = maiores.paraVetor();
         for (int i = 0; i < candidatos.length; i++) {
-            System.out.println("  " + candidatos[i] + " (" + candidatos[i].numeroCompanheiros() + " companheiros)");
+            System.out.println("  " + candidatos[i] + " (" + candidatos[i].numeroCompanheiros() + " potenciais companheiros)");
         }
     }
 
@@ -119,7 +131,7 @@ public class Main {
         System.out.println("===== AGÊNCIA DE RELACIONAMENTO =====");
         System.out.println("1 - Inserir/atualizar grau de interesse desejado");
         System.out.println("2 - Número e lista de potenciais companheiros de um candidato");
-        System.out.println("3 - K candidatos com mais potenciais companheiros");
+        System.out.println("3 - Ranking de compatibilidade (candidatos com mais potenciais companheiros)");
         System.out.println("4 - Candidatos sem nenhum companheiro");
         System.out.println("5 - Candidatos com interesse em uma área");
         System.out.println("6 - Candidatos que residem em um estado");
@@ -127,8 +139,12 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        int quantidade = QUANTIDADE_PADRAO;
-        gerarDados(quantidade);
+        // Só gera dados de teste se o candidatos.txt ainda não existir (nunca sobrescreve).
+        // Para gerar outro arquivo, use o programa auxiliar: java GeradorCandidatos [quantidade]
+        if (!new File(ARQUIVO_DADOS).exists()) {
+            System.out.println("'" + ARQUIVO_DADOS + "' não encontrado. Gerando dados de teste...");
+            gerarDados(QUANTIDADE_PADRAO);
+        }
         carregarDados();
 
         int opcao;
@@ -144,7 +160,7 @@ public class Main {
                     mostrarCompanheiros();
                     break;
                 case 3:
-                    mostrarMaioresNumerosDeCompanheiros();
+                    mostrarRankingCompatibilidade();
                     break;
                 case 4:
                     mostrarSemCompanheiros();
