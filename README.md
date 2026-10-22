@@ -32,3 +32,6 @@ FORMATO DO candidatos.txt
   N (primeira linha), e para cada candidato, precedido de "****":
   nome, sigla_estado, sexo (F/M), sexo_interesse (F/M/I),
   numero_areas, area_1, area_2, ...
+
+
+  Link para GitHub: https://github.com/yuriespindolade-del/Ag-nciaDeRelacionamento-AED/tree/main
