@@ -1,4 +1,3 @@
-import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -139,12 +138,8 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        // Só gera dados de teste se o candidatos.txt ainda não existir (nunca sobrescreve).
-        // Para gerar outro arquivo, use o programa auxiliar: java GeradorCandidatos [quantidade]
-        if (!new File(ARQUIVO_DADOS).exists()) {
-            System.out.println("'" + ARQUIVO_DADOS + "' não encontrado. Gerando dados de teste...");
-            gerarDados(QUANTIDADE_PADRAO);
-        }
+        // Gera um candidatos.txt novo (sobrescrevendo o anterior) a cada execução.
+        gerarDados(QUANTIDADE_PADRAO);
         carregarDados();
 
         int opcao;
