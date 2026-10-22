@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 
 /*
  * Issue: Parser do arquivo candidatos.txt.
@@ -38,7 +37,7 @@ public class LerCandidatos {
     public static ListaCandidatos ler(String nomeArquivo) throws IOException {
         ListaCandidatos candidatos = new ListaCandidatos();
         BufferedReader leitor = new BufferedReader(
-                new InputStreamReader(new FileInputStream(nomeArquivo), StandardCharsets.UTF_8));
+                new InputStreamReader(new FileInputStream(nomeArquivo)));
         try {
             int numeroCandidatos = converterParaInteiro(lerProximaLinha(leitor), "Número de candidatos");
             for (int posicao = 1; posicao <= numeroCandidatos; posicao++) {
